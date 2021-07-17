@@ -11,7 +11,6 @@ public class Handle : MonoBehaviour
     public bool isTied;
 
 
-
     // Start is called before the first frame update
     public void Setup(Vertex vertex)
     {
@@ -21,18 +20,27 @@ public class Handle : MonoBehaviour
         // A Joint is represented by a "Circle" Sprite
         sr = gameObject.AddComponent<SpriteRenderer>();
         sr.sprite = Resources.Load<Sprite>("Circle");
+        sr.sortingOrder = 1;
+        float size = (float)Camera.main.orthographicSize / 10f;
+        transform.localScale = new Vector3(size, size, 0);
 
-        gameObject.AddComponent<BoxCollider2D>();
+        
+        gameObject.AddComponent<BoxCollider>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        gameObject.GetComponent<BoxCollider>().enabled = sr.enabled;
+
+        // The Handle is fixed to the assigned vertex, cannot move unless vertex is moved.
         if (isFixed)
         {
             vertex.position = transform.position;
         }
 
+        // The handle is tied to a vertex. When the handle moves, the vertex moves too.
         if (isTied)
         {
             transform.position = vertex.position;

@@ -8,11 +8,12 @@ public class JsonReader : MonoBehaviour
 {
     /*  FILENAMES  */
 
+    public string fileName;
     // Open Pose Keypoints
-    string jointsFileName = "Assets/Resources/Jsons/DSC00944_keypoints.json";
+    string jointsFileName { get { return "Assets/Resources/Jsons/" + fileName + "_keypoints.json"; } }
 
     // SCHP's Mask's contours
-    string contoursFileName = "Assets/Resources/Jsons/contours.json";
+    string contoursFileName { get { return "Assets/Resources/Jsons/" + fileName + "_contours.json"; } }
 
 
     /*  CHARACTER RIG */

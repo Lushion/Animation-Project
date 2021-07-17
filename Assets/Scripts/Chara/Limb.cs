@@ -35,7 +35,7 @@ public class Limb : MeshCreator
         
         
         // Get every X points (X = step)
-        int step = 30;
+        int step = 1;
         for (int i = 0; i < (contourPoints.Count / step); i++)
         {
             meshPoints.Add(contourPoints[step * i]);

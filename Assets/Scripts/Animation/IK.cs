@@ -5,7 +5,9 @@ using UnityEngine;
 
 public class IK : MonoBehaviour
 {
-    public int id;
+    public int idEnd;
+    public int idInb;
+    public int idRoot;
     public Transform root;
     public Transform inbound;    
     public Transform endEff;    // End Effector
@@ -79,14 +81,16 @@ public class IK : MonoBehaviour
 
         }
     }
-    public void SetupTransforms(int endEffIndex, Character character)
+    public void SetupTransforms(int endEffIndex, int inbIndex, int rootIndex, Character character)
     {
         // Sets the transforms of the game objects
-        id = endEffIndex;
+        idEnd = endEffIndex;
+        idInb = inbIndex;
+        idRoot = rootIndex;
 
         foreach (Limb limb in character.limbs)
         {
-            if (limb.joints.Contains(character.FindJoint(endEffIndex)) && limb.joints.Contains(character.FindJoint(endEffIndex - 1)))
+            if (limb.joints.Contains(character.FindJoint(endEffIndex)) && limb.joints.Contains(character.FindJoint(inbIndex)))
             {
                 foreach (Spring spring in limb.contour.springs)
                 {
@@ -96,12 +100,12 @@ public class IK : MonoBehaviour
                     }
                 }
             }
-            else if (limb.joints.Contains(character.FindJoint(endEffIndex-2)) && limb.joints.Contains(character.FindJoint(endEffIndex - 1)))
+            else if (limb.joints.Contains(character.FindJoint(rootIndex)) && limb.joints.Contains(character.FindJoint(inbIndex)))
             {
                 
                 foreach (Spring spring in limb.contour.springs)
                 {
-                    if (spring.mobile == character.FindJoint(endEffIndex-1).point)
+                    if (spring.mobile == character.FindJoint(inbIndex).point)
                     {
                         RI = spring;
                     }
@@ -112,14 +116,6 @@ public class IK : MonoBehaviour
         endEff = IE.handleB.transform;
         inbound = RI.handleB.transform;
         root = RI.handleA.transform;
-
-        if (id == 4)
-        {
-            print(id);
-            print(endEff.position);
-            print(inbound.position);
-            print(root.position);
-        }
     }
 
     public void SetupPositions(Vector3 initInbound, Vector3 initEndEff, Vector3 targetInbound, Vector3 targetEndEffector)

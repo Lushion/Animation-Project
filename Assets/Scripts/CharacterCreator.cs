@@ -8,8 +8,8 @@ public class CharacterCreator : MonoBehaviour
     /* GAMEOBJECTS FOR IMAGE RENDERING */ 
 
     private Canvas canvas;
-    public Sprite sprite;
     public Image image;
+    public string fileName;
 
     public bool showCharacter = false;
     public bool showContour = true;
@@ -56,8 +56,8 @@ public class CharacterCreator : MonoBehaviour
         "Left Forearm",
         "Right Forearm",
         "Hips and Upper Legs",
+        "Left Lower Leg",
         "Right Lower Leg",
-        "Left Lower Leg"
     };
 
     // Directed Graph
@@ -93,10 +93,10 @@ public class CharacterCreator : MonoBehaviour
         { "Left Forearm", new int[]{ 3, 4 } },
         { "Right Forearm", new int[]{ 6, 7 } },
         { "Hips and Upper Legs", new int[]{ 8, 9, 10, 12, 13 } },
-        //{ "Right Upper Leg", new int[]{ 12, 13 } },
-        { "Right Lower Leg", new int[]{ 13, 14 } },
         //{ "Left Upper Leg", new int[]{ 9, 10 } },
         { "Left Lower Leg", new int[]{ 10, 11 } },
+        //{ "Right Upper Leg", new int[]{ 12, 13 } },
+        { "Right Lower Leg", new int[]{ 13, 14 } },
     };
 
     private List<Character> characters = new List<Character>();
@@ -120,21 +120,25 @@ public class CharacterCreator : MonoBehaviour
         canvasGO.AddComponent<CanvasScaler>();
 
 
+
         //Vector2 position = new Vector2(canvas.pixelRect.width / 2, canvas.pixelRect.height / 2);
         Vector2 position = new Vector2(0, 0);
 
         // Shows the original image
         GameObject imageGO = new GameObject();
         image = imageGO.AddComponent<Image>();
-        image.sprite = sprite;
-        image.rectTransform.sizeDelta = new Vector2(sprite.rect.width, sprite.rect.height);
+        image.sprite = Resources.Load<Sprite>("Images/" + fileName);
+        image.rectTransform.sizeDelta = new Vector2(image.sprite.rect.width, image.sprite.rect.height);
         imageGO.transform.SetParent(canvas.transform);
         imageGO.transform.localScale = new Vector3(0.1f, 0.1f);
         imageGO.transform.localPosition = position;
         imageGO.name = "Sprite";
 
+        Camera.main.orthographicSize = image.sprite.rect.height / 20;
+
         // Creates a JSON reader
         JsonReader jr = gameObject.AddComponent<JsonReader>();
+        jr.fileName = fileName;
         List<Vector2> jointCoordinates = ArrangeJointCoordinates(jr.ReadJointPositions());
         List<List<Vector3>> contourList = ArrangeContourCoordinates(jr.ReadLimbContourPoints());
 
@@ -170,6 +174,7 @@ public class CharacterCreator : MonoBehaviour
         foreach (Limb limb in character.limbs) { 
             limb.mr.enabled = showMesh;
             limb.contour.mr.enabled = showContour;
+            limb.contour.thickness = image.sprite.rect.height / 1000;
         }
     }
 
@@ -222,8 +227,8 @@ public class CharacterCreator : MonoBehaviour
         // Unity coordinates: (0, 0) at the center of the image from bottom to top
         // The vertical axis needs to be reversed and the image needs to be centered 
         // The canvas dimensions are offsets
-        float x = ptOpenPose.x - (sprite.rect.width / 2);
-        float y = -ptOpenPose.y + (sprite.rect.height / 2);
+        float x = ptOpenPose.x - (image.sprite.rect.width / 2);
+        float y = -ptOpenPose.y + (image.sprite.rect.height / 2);
 
         Vector2 ptUnity = new Vector2(x, y);
 

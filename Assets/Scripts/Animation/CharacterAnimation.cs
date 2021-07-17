@@ -21,8 +21,13 @@ public class CharacterAnimation : MonoBehaviour
     public Button deletionButton = null;
     public Button modificationButton = null;
     public Button animationButton = null;
-    public Text text = null;
-    public InputField iF = null;
+    public Text textIF = null;
+    public Text textSlider = null;
+    public InputField selectKeyIF = null;
+    public Slider timingSlider = null;
+
+    public GameObject cursor;
+
 
     public void Setup(Character character, Canvas canvas)
     {
@@ -62,16 +67,31 @@ public class CharacterAnimation : MonoBehaviour
         animationButton.GetComponentInChildren<Text>().text = "Animate";
         animationButton.onClick.AddListener(() => { RoutineWrap(); });
 
-        GameObject textGO = DefaultControls.CreateText(new DefaultControls.Resources());
-        textGO.transform.SetParent(UI.transform);
-        text = textGO.GetComponent<Text>();
+        GameObject textIFGO = DefaultControls.CreateText(new DefaultControls.Resources());
+        textIFGO.transform.SetParent(UI.transform);
+        textIF = textIFGO.GetComponent<Text>();
 
         GameObject ifGO = DefaultControls.CreateInputField(new DefaultControls.Resources());
         ifGO.transform.SetParent(UI.transform);
-        iF = ifGO.GetComponent<InputField>();
-        iF.transform.position = new Vector3(canvas.pixelRect.width / 2, canvas.pixelRect.height + iF.gameObject.GetComponent<RectTransform>().rect.height / 2, 0);
-        iF.contentType = InputField.ContentType.IntegerNumber;
-        iF.text = "0";
+        selectKeyIF = ifGO.GetComponent<InputField>();
+        selectKeyIF.transform.position = new Vector3(canvas.pixelRect.width / 2, canvas.pixelRect.height + selectKeyIF.gameObject.GetComponent<RectTransform>().rect.height / 2, 0);
+        selectKeyIF.contentType = InputField.ContentType.IntegerNumber;
+        selectKeyIF.text = "0";
+
+
+        GameObject sliderGO = DefaultControls.CreateSlider(new DefaultControls.Resources());
+        sliderGO.transform.SetParent(UI.transform);
+        timingSlider = sliderGO.GetComponent<Slider>();
+        timingSlider.transform.position = new Vector3(canvas.pixelRect.width / 2, canvas.pixelRect.height + selectKeyIF.gameObject.GetComponent<RectTransform>().rect.height * 5/ 2, 0);
+        timingSlider.minValue = 1;
+        timingSlider.maxValue = 3;
+        timingSlider.wholeNumbers = true;
+
+        GameObject textSliderGO = DefaultControls.CreateText(new DefaultControls.Resources());
+        textSliderGO.transform.SetParent(UI.transform);
+        textSlider = textSliderGO.GetComponent<Text>();
+
+        cursor = new GameObject();
     }
 
 
@@ -96,11 +116,17 @@ public class CharacterAnimation : MonoBehaviour
         RectTransform animRect = animationButton.GetComponent<RectTransform>();
         animationButton.transform.position = new Vector3(canvas.pixelRect.width - animRect.rect.width / 2, canvas.pixelRect.height - animRect.rect.height / 2, 0);
 
-        text.transform.position = new Vector3(canvas.pixelRect.width / 2, canvas.pixelRect.height - text.rectTransform.rect.height * 3 / 2, 0);
-        iF.transform.position = new Vector3(canvas.pixelRect.width / 2, canvas.pixelRect.height - iF.gameObject.GetComponent<RectTransform>().rect.height / 2, 0);
+        RectTransform sliderRect = animationButton.GetComponent<RectTransform>();
+        timingSlider.transform.position = new Vector3(canvas.pixelRect.width - sliderRect.rect.width / 2, canvas.pixelRect.height - sliderRect.rect.height * 5 / 2, 0);
 
+        textIF.transform.position = new Vector3(canvas.pixelRect.width / 2, canvas.pixelRect.height - textIF.rectTransform.rect.height * 3 / 2, 0);
+        selectKeyIF.transform.position = new Vector3(canvas.pixelRect.width / 2, canvas.pixelRect.height - selectKeyIF.gameObject.GetComponent<RectTransform>().rect.height / 2, 0);
+        
+        textSlider.transform.position = new Vector3(canvas.pixelRect.width - textSlider.rectTransform.rect.width / 2, canvas.pixelRect.height - textSlider.rectTransform.rect.height * 7 / 2, 0);
+        textSlider.text = "Drawing every " + timingSlider.value +  " frame(s)";
+        timing = timingSlider.value;
 
-        // REmove unnecessary buttons
+        // Remove unnecessary buttons
         characterPoseSelectionButton.image.enabled = (selectedKeyPose < keyPoses.Count);
         deletionButton.image.enabled = (selectedKeyPose < keyPoses.Count);
         modificationButton.image.enabled = (selectedKeyPose < keyPoses.Count);
@@ -111,7 +137,7 @@ public class CharacterAnimation : MonoBehaviour
 
         try
         {
-            selectedKeyPose = int.Parse(iF.textComponent.text);
+            selectedKeyPose = int.Parse(selectKeyIF.textComponent.text);
 
         }
         catch (FormatException)
@@ -121,11 +147,28 @@ public class CharacterAnimation : MonoBehaviour
 
         if (selectedKeyPose < keyPoses.Count)
         {
-            text.text = "Selected Key Pose: " + selectedKeyPose;
+            textIF.text = "Selected Key Pose: " + selectedKeyPose;
         }
         else
         {
-            text.text = "Key Pose " + selectedKeyPose + " doesn't exist";
+            textIF.text = "Key Pose " + selectedKeyPose + " doesn't exist";
+        }
+
+        if (Input.GetMouseButton(0))
+        {
+            Vector3 mousePos = new Vector3(Input.mousePosition.x, Input.mousePosition.y, Camera.main.nearClipPlane);         // Gets cursor position from mouse position 
+            Vector3 newPosition = Camera.main.ScreenToWorldPoint(mousePos);                             // Converts by using the camera
+
+            cursor.transform.position = newPosition;                                                           // Sets new position
+
+            Ray selectionRay = Camera.main.ViewportPointToRay(Camera.main.ScreenToViewportPoint(Input.mousePosition));
+            RaycastHit selectionHit;
+
+            if (Physics.Raycast(selectionRay, out selectionHit, Mathf.Infinity))
+            {
+                Handle handle = selectionHit.transform.gameObject.GetComponent<Handle>();
+                handle.transform.position = new Vector3(cursor.transform.position.x, cursor.transform.position.y, handle.transform.position.z);
+            }
         }
     }
 
@@ -299,7 +342,7 @@ public class CharacterAnimation : MonoBehaviour
                     // Lines, for testing
                     foreach (IK ik in character.iks)
                     {
-                        ik.SetupPositions(keyPoses[keyPose].pose[ik.id - 1], keyPoses[keyPose].pose[ik.id], keyPoses[keyPose + 1].pose[ik.id - 1], keyPoses[keyPose + 1].pose[ik.id]);
+                        ik.SetupPositions(keyPoses[keyPose].pose[ik.idInb], keyPoses[keyPose].pose[ik.idEnd], keyPoses[keyPose + 1].pose[ik.idInb], keyPoses[keyPose + 1].pose[ik.idEnd]);
 
                         if (ik.root != null && ik.inbound != null && ik.endEff != null)
                         {
@@ -318,11 +361,17 @@ public class CharacterAnimation : MonoBehaviour
 
     public void RoutineWrap()
     {
-        //StartCoroutine(Translate());
         StartCoroutine(IK());
     }
 
+    //public void RelaxLimbs()
+    //{
+    //    CharacterPose CP = keyPoses[selectedKeyPose];
+    //    foreach(Spring spring in character.handles.Keys)
+    //    {
 
+    //    }
+    //}
 
     public class CharacterPose
     {

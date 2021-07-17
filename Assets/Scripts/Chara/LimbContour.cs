@@ -66,9 +66,6 @@ public class LimbContour : ContourStretchSquash
 
         foreach (Spring spring in springs)
         {
-            spring.handleA.transform.localScale = new Vector3(10, 10, 10);
-            spring.handleB.transform.localScale = new Vector3(10, 10, 10);
-
             
             spring.handleA.sr.enabled = false;
             spring.handleA.isTied = true;

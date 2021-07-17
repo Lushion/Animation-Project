@@ -30,7 +30,7 @@ public class CharacterJoint : MonoBehaviour
         // Creating a GameObject for each joint and places them
         localCoordinates = coord;
         point = new Vertex(coord);
-        transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+        transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
         transform.localPosition = coord;
 
         // A Joint is represented by a "Circle" Sprite

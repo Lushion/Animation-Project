@@ -4,7 +4,7 @@ import numpy as np
 import json
 
 # Change path to find image and mask
-filename = "DSC00944.png"
+filename = "DSC00944"
 path = os.getcwd()
 split_path = path.split('\\')
 parent_path = ""
@@ -15,21 +15,21 @@ resources_path = parent_path + "Assets\\Resources\\"
 os.chdir(resources_path)
 
 # Image
-image_path = resources_path + "Images\\" + filename
+image_path = resources_path + "Images\\" + filename + ".png"
 im = cv2.imread(image_path)
-im = cv2.resize(im, None, fx=1/10, fy=1/10)
+#im = cv2.resize(im, None, fx=1/10, fy=1/10)
 
 # Show Image
-# image_window = "Image"
-# cv2.namedWindow(image_window)
-# cv2.moveWindow(image_window, 20, 20)
-# cv2.imshow(image_window, im)
-# cv2.waitKey()
+#image_window = "Image"
+#cv2.namedWindow(image_window)
+#cv2.moveWindow(image_window, 20, 20)
+#cv2.imshow(image_window, im)
+#cv2.waitKey()
 
 # Mask
-mask_path = resources_path + "Masks\\" + filename
+mask_path = resources_path + "Masks\\" + filename + ".png"
 mask = cv2.imread(mask_path)
-mask = cv2.resize(mask, None, fx=1/10, fy=1/10)
+#mask = cv2.resize(mask, None, fx=1/10, fy=1/10)
 
 # Show mask
 # mask_window = "Mask"
@@ -65,6 +65,7 @@ for color in all_colors:
         # Calculates contours in mask
         contour_mask = cv2.cvtColor(new_mask, cv2.COLOR_BGR2GRAY)
         contours, hierarchy = cv2.findContours(contour_mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
         raw_contours.append(contours)
 
         # Show contours in image
@@ -81,21 +82,56 @@ cv2.waitKey()
 
 # Separates each contour
 all_contours = {"contours": []}
-for contour in raw_contours:
-    for i in range(len(contour)):
-        # Calculates contour length for each limb
-        all_contours["contours"].append(
-            {"contourPoints":
-                 [{"x": int(contour[i][j][0][0]),
-                   "y": int(contour[i][j][0][1])} for j in range(len(contour[i]))],
-             "contourLength": cv2.arcLength(contour[i], True)})
 
-        # Show each contour on black canvas
-        #contour_canvas = np.zeros(new_mask.shape)
-        #cv2.drawContours(contour_canvas, contour, i, (0, 255, 0), 3)
-        #contour_window = "Contour"
-        #cv2.imshow(contour_window, contour_canvas)
-        #cv2.waitKey()
+
+def AddToAllContours(contourNumber):
+    all_contours["contours"].append(
+        {"contourPoints":
+             [{"x": int(contour[contourNumber][j][0][0]),
+               "y": int(contour[contourNumber][j][0][1])} for j in range(len(contour[contourNumber]))],
+         "contourLength": cv2.arcLength(contour[contourNumber], True)})
+
+    # Show each contour on black canvas
+    contour_canvas = np.zeros(new_mask.shape)
+    cv2.drawContours(contour_canvas, contour, contourNumber, (0, 255, 0), 3)
+    cv2.imshow(contour_window, contour_canvas)
+    cv2.waitKey()
+
+
+for contour in raw_contours:
+    #len contour is the number of contours in a raw_contours set of contour (those with the same color in mask)
+    # Calculates contour points length for each limb
+    if(len(contour) == 1):
+        AddToAllContours(0)
+
+    if(len(contour) == 2):
+        if (contour[0][0][0][0] < contour[1][0][0][0]):
+            AddToAllContours(0)
+
+            AddToAllContours(1)
+
+        else:
+            AddToAllContours(1)
+            AddToAllContours(0)
+
+
+# Toggle between the first (to write the JSON in Unity) or the second (to write the JSON in the Python folder)
+json_filename = resources_path + "Jsons\\" + filename + "_contours.json"
+#json_filename = path + "contours.json"
+
+with open(json_filename, "w") as json_file:
+     json_file.write(json.dumps(all_contours))
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Find overall contour
@@ -123,12 +159,6 @@ cv2.waitKey()
 
 # print(all_contours)
 
-# Toggle between the first (to write the JSON in Unity) or the second (to write the JSON in the Python folder)
-# json_filename = resources_path + "Jsons\\contours.json"
-# json_filename = path + "contours.json"
-
-# with open(json_filename, "w") as json_file:
-#     json_file.write(json.dumps(all_contours))
 
 # Global contour
 #new_mask = ((mask == [0, 0, 0]).all(axis=2).astype(int)*255).astype(np.uint8)
@@ -146,8 +176,8 @@ cv2.waitKey()
 
 
 # Toggle between the first (to write the JSON in Unity) or the second (to write the JSON in the Python folder)
-# json_filename = resources_path + "Jsons\\global_contours.json"
-# json_filename = path + "contours.json"
+#json_filename = resources_path + "Jsons\\global_contours.json"
+#json_filename = path + "contours.json"
 
 # with open(json_filename, "w") as json_file:
 #     json_file.write(json.dumps(all_contours))

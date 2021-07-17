@@ -152,8 +152,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5426ddaff63c5bc49b1a31ec2114083e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sprite: {fileID: 21300000, guid: 14d08bae35dd9e74185bfe121d105251, type: 3}
   image: {fileID: 0}
+  fileName: DSC00944
   showCharacter: 0
   showContour: 1
   showMesh: 1
@@ -224,8 +224,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 0
-  orthographic size: 40
+  orthographic: 1
+  orthographic size: 400
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2

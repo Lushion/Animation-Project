@@ -75,6 +75,7 @@ public class Character : MonoBehaviour
         // Assigns the central hips to the root object
         FindJoint(8).gameObject.transform.SetParent(rootGO.transform);
 
+
         // Sets the armature from Graph
         foreach (int parentIndex in JointHierarchy.Keys)
         {
@@ -111,14 +112,15 @@ public class Character : MonoBehaviour
         rig.transform.SetParent(transform);
 
         //////IK spineIK = CreateNewIkRig("Spine", 0);
-        CreateNewIkRig("Left Arm", 4);
-        CreateNewIkRig("Right Arm", 7);
+        CreateNewIkRig("Head", 0, 1, 8);
+        CreateNewIkRig("Left Arm", 4, 3, 2);
+        CreateNewIkRig("Right Arm", 7, 6, 5);
 
-        CreateNewIkRig("Left Leg", 11);
-        CreateNewIkRig("Right Leg", 14);
+        CreateNewIkRig("Left Leg", 11, 10, 9);
+        CreateNewIkRig("Right Leg", 14, 13, 12);
     }
 
-    public IK CreateNewIkRig(string name, int endEffectorIndex)
+    public IK CreateNewIkRig(string name, int endEffectorIndex, int inbIndex, int rootIndex)
     {
         GameObject IKGO = new GameObject();
         IKGO.transform.SetParent(rigGO.transform);
@@ -126,7 +128,7 @@ public class Character : MonoBehaviour
 
         CharacterJoint joint = FindJoint(endEffectorIndex);
         IK ik = IKGO.AddComponent<IK>();
-        ik.SetupTransforms(endEffectorIndex, this);
+        ik.SetupTransforms(endEffectorIndex, inbIndex, rootIndex, this);
         iks.Add(ik);
         
         return ik;
