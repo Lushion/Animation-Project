@@ -108,8 +108,6 @@ public class Character : MonoBehaviour
     public void SetRig()
     {
         rigGO = new GameObject { name = "Rig" };
-        Rig rig = rigGO.AddComponent<Rig>();
-        rig.transform.SetParent(transform);
 
         //////IK spineIK = CreateNewIkRig("Spine", 0);
         CreateNewIkRig("Head", 0, 1, 8);
@@ -134,20 +132,20 @@ public class Character : MonoBehaviour
         return ik;
     }
 
-    public void ShowBoneStructure()
-    {
-        // Adds a Components for Bone Rendering
-        RigBuilder rb = gameObject.AddComponent<RigBuilder>();
-        BoneRenderer boneRenderer = gameObject.AddComponent<BoneRenderer>();
+    //public void ShowBoneStructure()
+    //{
+    //    // Adds a Components for Bone Rendering
+    //    RigBuilder rb = gameObject.AddComponent<RigBuilder>();
+    //    BoneRenderer boneRenderer = gameObject.AddComponent<BoneRenderer>();
 
-        // Creates a list of transforms for the bone renderer
-        boneRenderer.transforms = new Transform[joints.Count];
+    //    // Creates a list of transforms for the bone renderer
+    //    boneRenderer.transforms = new Transform[joints.Count];
 
-        for (int i = 0; i < joints.Count; i++)
-        {
-            boneRenderer.transforms[i] = FindJoint(i).gameObject.transform;
-        }
-    }
+    //    for (int i = 0; i < joints.Count; i++)
+    //    {
+    //        boneRenderer.transforms[i] = FindJoint(i).gameObject.transform;
+    //    }
+    //}
 
     public CharacterJoint FindJoint(int index) { return joints[index]; }
 
